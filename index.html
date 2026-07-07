@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>khmerthings — interactive demo</title>
+<meta name="description" content="Try all 7 khmerthings Khmer NLP tools live in your browser, running real Python via Pyodide.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <h1>khmerthings</h1>
+  <p class="tagline">Deterministic Khmer language tools — running as real Python in your browser via <a href="https://pyodide.org/" target="_blank" rel="noopener">Pyodide</a>, no server involved.</p>
+  <div id="status-bar" class="status status-loading">Loading Pyodide…</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab-btn active" data-panel="panel-segment">Word breaker</button>
+  <button class="tab-btn" data-panel="panel-count">Word counter</button>
+  <button class="tab-btn" data-panel="panel-sort">Line sorter</button>
+  <button class="tab-btn" data-panel="panel-spellcheck">Spellchecker</button>
+  <button class="tab-btn" data-panel="panel-spellfix">Spellfixer</button>
+  <button class="tab-btn" data-panel="panel-normalize">Normalizer</button>
+  <button class="tab-btn" data-panel="panel-condense">Condenser</button>
+</nav>
+
+<main>
+
+<!-- Word breaker -->
+<section class="tool-panel active" id="panel-segment">
+  <h2>Word breaker</h2>
+  <p class="desc">Split Khmer text into words. Khmer script writes no spaces between words, so this does the real segmentation work.</p>
+  <textarea class="kt-text" rows="3">ខ្ញុំស្រឡាញ់ភាសាខ្មែរ</textarea>
+  <div class="options">
+    <fieldset class="mode-group">
+      <legend>Mode</legend>
+      <label><input type="radio" name="segment-mode" value="list" checked> List words</label>
+      <label><input type="radio" name="segment-mode" value="mark"> Mark boundaries</label>
+    </fieldset>
+    <label class="reveal-toggle" hidden><input type="checkbox" class="reveal-seps"> Reveal separators (·)</label>
+    <div class="include-group" data-includes></div>
+  </div>
+  <button class="run" data-tool="segment">Run</button>
+  <div class="error" hidden></div>
+  <div class="output"></div>
+</section>
+
+<!-- Word counter -->
+<section class="tool-panel" id="panel-count">
+  <h2>Word counter</h2>
+  <p class="desc">Count words and characters in Khmer or mixed text.</p>
+  <textarea class="kt-text" rows="3">ខ្ញុំមានឆ្កែ ២ ក្បាល and 3 cats</textarea>
+  <div class="options">
+    <div class="include-group" data-includes></div>
+  </div>
+  <button class="run" data-tool="count">Run</button>
+  <div class="error" hidden></div>
+  <div class="output"></div>
+</section>
+
+<!-- Line sorter -->
+<section class="tool-panel" id="panel-sort">
+  <h2>Line sorter</h2>
+  <p class="desc">Sort lines in Khmer dictionary order (one entry per line).</p>
+  <textarea class="kt-text" rows="5">ក្រ
+កា
+កក</textarea>
+  <div class="options">
+    <label><input type="checkbox" class="sort-desc"> Descending</label>
+  </div>
+  <button class="run" data-tool="sort">Run</button>
+  <div class="error" hidden></div>
+  <div class="output"></div>
+</section>
+
+<!-- Spellchecker -->
+<section class="tool-panel" id="panel-spellcheck">
+  <h2>Spellchecker</h2>
+  <p class="desc">Find Khmer misspellings and unknown words.</p>
+  <textarea class="kt-text" rows="3">ខ្ញុំសំរាប់ការងារ</textarea>
+  <div class="options">
+    <label>Max suggestions <input type="number" class="max-suggestions" value="3" min="0" max="20" style="width:4em"></label>
+    <div class="include-group" data-includes></div>
+  </div>
+  <button class="run" data-tool="spellcheck">Run</button>
+  <div class="error" hidden></div>
+  <div class="output"></div>
+</section>
+
+<!-- Spellfixer -->
+<section class="tool-panel" id="panel-spellfix">
+  <h2>Spellfixer</h2>
+  <p class="desc">Rewrite known misspellings to their canonical spelling.</p>
+  <textarea class="kt-text" rows="3">ខ្ញុំសំរាប់ការងារ</textarea>
+  <div class="options">
+    <div class="include-group" data-includes></div>
+  </div>
+  <button class="run" data-tool="spellfix">Run</button>
+  <div class="error" hidden></div>
+  <div class="output"></div>
+</section>
+
+<!-- Normalizer -->
+<section class="tool-panel" id="panel-normalize">
+  <h2>Normalizer</h2>
+  <p class="desc">Spellfix and re-space text into clean, ready-to-use form.</p>
+  <textarea class="kt-text" rows="3">ខ្ញុំសំរាប់ការងារ</textarea>
+  <div class="options">
+    <label class="reveal-toggle"><input type="checkbox" class="reveal-seps"> Reveal separators (·)</label>
+    <div class="include-group" data-includes></div>
+  </div>
+  <button class="run" data-tool="normalize">Run</button>
+  <div class="error" hidden></div>
+  <div class="output"></div>
+</section>
+
+<!-- Condenser -->
+<section class="tool-panel" id="panel-condense">
+  <h2>Condenser</h2>
+  <p class="desc">Strip function words, keeping only content (meaning-bearing) words.</p>
+  <textarea class="kt-text" rows="3">ខ្ញុំចង់ទៅផ្សារនៅ ព្រោះខ្ញុំចង់ទិញត្រី</textarea>
+  <div class="options">
+    <fieldset class="mode-group">
+      <legend>Mode</legend>
+      <label><input type="radio" name="condense-mode" value="text" checked> Condensed text</label>
+      <label><input type="radio" name="condense-mode" value="words"> Word list</label>
+    </fieldset>
+    <fieldset class="remove-group">
+      <legend>Categories to remove</legend>
+      <div data-categories></div>
+    </fieldset>
+    <div class="include-group" data-includes></div>
+  </div>
+  <button class="run" data-tool="condense">Run</button>
+  <div class="error" hidden></div>
+  <div class="output"></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <p>
+    <a href="https://github.com/spkskx/khmerthings" target="_blank" rel="noopener">khmerthings on GitHub</a>
+    · <a href="https://pypi.org/project/khmerthings/" target="_blank" rel="noopener">PyPI</a>
+    · <a href="https://github.com/spkskx/khmerthings-demo" target="_blank" rel="noopener">this demo's source</a>
+  </p>
+  <p class="license">MIT licensed.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
+<script src="js/pyodide-runtime.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
