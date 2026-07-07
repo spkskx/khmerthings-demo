@@ -18,6 +18,7 @@ function setStatus(text, kind) {
 
 async function initPyodide() {
   let pyodide;
+  document.querySelector(".workspace").classList.add("pyodide-loading");
   try {
     setStatus("Loading Pyodide…", "loading");
     pyodide = await loadPyodide();
@@ -108,10 +109,11 @@ def demo_condense(text, includes_json, remove_json, words_mode):
     KT._pyodide = pyodide;
     KT.ready = true;
     setStatus("Ready — khmerthings v" + KT.version, "ready");
-    document.querySelectorAll("button.run").forEach((b) => (b.disabled = false));
   } catch (err) {
     console.error(err);
     setStatus("Failed to load: " + (err && err.message ? err.message : err), "error");
+  } finally {
+    document.querySelector(".workspace").classList.remove("pyodide-loading");
   }
 }
 

@@ -42,7 +42,7 @@ body {
 }
 
 header.site-header {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 1.25rem 1rem;
   text-align: center;
@@ -79,36 +79,63 @@ header.site-header h1 {
   color: var(--error-fg);
 }
 
-nav.tabs {
-  max-width: 900px;
+/* 3-column layout */
+
+.layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 320px;
+  gap: 1.25rem;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.25rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  justify-content: center;
+  padding: 0 1.25rem 2rem;
+  align-items: start;
 }
 
-.tab-btn {
-  padding: 0.5rem 0.9rem;
+.sidebar,
+.code-panel {
+  position: sticky;
+  top: 1rem;
+}
+
+.tool-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.tool-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem 0.9rem;
   border: 1px solid var(--border);
+  border-radius: 6px;
   background: var(--panel-bg);
   color: var(--fg);
-  border-radius: 6px 6px 0 0;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
-.tab-btn.active {
+.tool-item:hover:not(.active) {
+  background: var(--bg);
+}
+
+.tool-item.active {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
 }
 
-main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 1.25rem;
+.workspace {
+  min-width: 0;
+}
+
+.workspace.pyodide-loading .output-section,
+.workspace.pyodide-loading .diagram-section {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .tool-panel {
@@ -167,21 +194,6 @@ fieldset {
   display: none;
 }
 
-button.run {
-  padding: 0.55rem 1.2rem;
-  border: none;
-  border-radius: 6px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-button.run:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .error {
   margin-top: 0.9rem;
   padding: 0.6rem 0.9rem;
@@ -190,8 +202,43 @@ button.run:disabled {
   color: var(--error-fg);
 }
 
-.output {
+.output-header,
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.output-header h3,
+.diagram-section h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.output-section {
   margin-top: 1rem;
+}
+
+.diagram-section {
+  margin-top: 1.5rem;
+}
+
+.copy-btn {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.copy-btn.copied {
+  background: #0a6b3d;
+  color: #fff;
+  border-color: #0a6b3d;
 }
 
 .kt-text-output {
@@ -230,8 +277,111 @@ table tr:nth-child(even) {
   background: var(--bg);
 }
 
+/* Pipeline diagrams */
+
+.diagram-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diagram-stage {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.diagram-arrow {
+  color: var(--muted);
+  font-size: 1.2rem;
+  flex: 0 0 auto;
+}
+
+.diagram-fork {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.diagram-branch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.diagram-badge {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.diagram-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
+.diagram-grid-cell {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: var(--panel-bg);
+}
+
+.diagram-grid-label {
+  color: var(--muted);
+}
+
+.diagram-grid-value {
+  font-weight: 600;
+}
+
+/* Code panel */
+
+.code-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.code-block-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-block-header {
+  padding: 0.4rem 0.75rem;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+
+.code-block {
+  margin: 0;
+  padding: 0.75rem;
+  background: var(--bg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+}
+
 footer.site-footer {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem 1.25rem 3rem;
   text-align: center;
@@ -239,8 +389,32 @@ footer.site-footer {
   font-size: 0.9rem;
 }
 
+@media (max-width: 1000px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar,
+  .code-panel {
+    position: static;
+  }
+
+  .tool-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .tool-item {
+    width: auto;
+  }
+}
+
 @media (max-width: 600px) {
   .before-after {
+    grid-template-columns: 1fr;
+  }
+
+  .diagram-grid {
     grid-template-columns: 1fr;
   }
 }
