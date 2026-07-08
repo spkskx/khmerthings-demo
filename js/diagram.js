@@ -66,15 +66,18 @@ const DIAGRAM_SPECS = {
 
   spellcheck(data) {
     const issues = data ? data.issues : null;
+    const only = data ? data.only : "";
     const variantCount = issues ? issues.filter((i) => i.kind === "variant").length : null;
     const unknownCount = issues ? issues.filter((i) => i.kind === "unknown").length : null;
+    const variantBadge = only === "unknown" ? "skipped" : issues ? `${variantCount} found` : null;
+    const unknownBadge = only === "variants" ? "skipped" : issues ? `${unknownCount} found` : null;
     return {
       stages: [...BASE_STAGES],
       fork: [
-        { label: "Dict lookup (VARIANT)", badge: issues ? `${variantCount} found` : null },
-        { label: "Edit-distance suggestions (UNKNOWN)", badge: issues ? `${unknownCount} found` : null },
+        { label: "Dict lookup (VARIANT)", badge: variantBadge },
+        { label: "Edit-distance suggestions (UNKNOWN)", badge: unknownBadge },
       ],
-      after: { label: "Merge, sorted by position" },
+      after: { label: only ? "Report the single kind" : "Merge, sorted by position" },
     };
   },
 
@@ -91,14 +94,20 @@ const DIAGRAM_SPECS = {
 
   normalize(data) {
     const badge = data ? `${countZwsp(data.result)} boundaries spaced` : null;
-    return {
-      stages: [
-        ...BASE_STAGES,
-        { label: "fix_spelling (VARIANT rewrite)" },
-        { label: "space_words (hidden ZWSP at boundaries)", badge },
-        { label: "space_sentences (។ / ៕ spacing)" },
-      ],
-    };
+    const only = data ? data.only : "";
+    const wordStages = [
+      { label: "fix_spelling (VARIANT rewrite)" },
+      { label: "space_words (hidden ZWSP at boundaries)", badge },
+    ];
+    const sentenceStage = { label: "space_sentences (។ / ៕ spacing)" };
+    if (only === "words") {
+      return { stages: [...BASE_STAGES, ...wordStages] };
+    }
+    if (only === "sentences") {
+      // Lexicon-free pass — no tokenization stages.
+      return { stages: [{ label: "NFC normalize" }, sentenceStage] };
+    }
+    return { stages: [...BASE_STAGES, ...wordStages, sentenceStage] };
   },
 
   condense(data) {
@@ -109,6 +118,26 @@ const DIAGRAM_SPECS = {
         { label: "Drop (stopword category in remove set)", badge: data ? `${data.removedCount} removed` : null },
       ],
     };
+  },
+
+  romanize(data) {
+    return {
+      stages: [
+        ...BASE_STAGES,
+        { label: "Exception lexicon, else register/vowel rules" },
+        { label: "Emit Latin (phonetic, not reversible)" },
+      ],
+    };
+  },
+
+  numerals(data) {
+    const labels = {
+      khmer: "Arabic digits → Khmer digits (០–៩)",
+      arabic: "Khmer digits → Arabic digits (0–9)",
+      words: "Spell numbers in Khmer words (decimal units)",
+    };
+    const to = data ? data.to : "khmer";
+    return { stages: [{ label: labels[to] }] };
   },
 };
 

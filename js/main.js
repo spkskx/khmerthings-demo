@@ -61,7 +61,7 @@ function setupSidebar() {
 
 function wireReactiveInputs() {
   document.querySelectorAll(".tool-panel").forEach((panel) => {
-    panel.querySelectorAll("input, textarea").forEach((el) => {
+    panel.querySelectorAll("input, textarea, select").forEach((el) => {
       const evt = el.tagName === "TEXTAREA" || el.type === "number" ? "input" : "change";
       el.addEventListener(evt, () => onPanelChange(panel));
     });

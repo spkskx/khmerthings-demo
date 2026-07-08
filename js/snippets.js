@@ -27,6 +27,11 @@ function heredoc(text) {
   return `<<'${delim}'\n${text}\n${delim}`;
 }
 
+// Single-quote a value for a POSIX shell (for CLI flag arguments).
+function shQuote(s) {
+  return "'" + s.replaceAll("'", "'\\''") + "'";
+}
+
 function buildPythonSnippet(tool, state) {
   const lexExpr = includeArgsPy(state.includes || []);
   const lexLine = lexExpr ? `lexicon = ${lexExpr}\n` : "";
@@ -35,11 +40,12 @@ function buildPythonSnippet(tool, state) {
   switch (tool) {
     case "segment": {
       if (state.mode === "mark") {
+        const sepPy = state.separator ? pyStr(state.separator) : '"\\u200b"';
         return (
           `from khmerthings import mark_boundaries${lexExpr ? ", load_lexicon" : ""}\n\n` +
           `text = ${pyStr(state.text)}\n` +
           lexLine +
-          `marked = mark_boundaries(text, "\\u200b"${lexArg})\n` +
+          `marked = mark_boundaries(text, ${sepPy}${lexArg})\n` +
           `print(marked)\n`
         );
       }
@@ -72,11 +78,18 @@ function buildPythonSnippet(tool, state) {
     }
 
     case "spellcheck": {
+      const fn =
+        state.only === "variants"
+          ? "check_variants"
+          : state.only === "unknown"
+            ? "check_unknown"
+            : "check_spelling";
+      const maxArg = state.only === "variants" ? "" : `, max_suggestions=${state.maxSuggestions}`;
       return (
-        `from khmerthings import check_spelling${lexExpr ? ", load_lexicon" : ""}\n\n` +
+        `from khmerthings import ${fn}${lexExpr ? ", load_lexicon" : ""}\n\n` +
         `text = ${pyStr(state.text)}\n` +
         lexLine +
-        `issues = check_spelling(text${lexArg}, max_suggestions=${state.maxSuggestions})\n` +
+        `issues = ${fn}(text${lexArg}${maxArg})\n` +
         `for issue in issues:\n` +
         `    print(issue.kind.value, issue.text, issue.suggestions)\n`
       );
@@ -93,6 +106,24 @@ function buildPythonSnippet(tool, state) {
     }
 
     case "normalize": {
+      if (state.only === "sentences") {
+        // Lexicon-free pass; no lexicon import or argument.
+        return (
+          `from khmerthings import space_sentences\n\n` +
+          `text = ${pyStr(state.text)}\n` +
+          `result = space_sentences(text)\n` +
+          `print(result)\n`
+        );
+      }
+      if (state.only === "words") {
+        return (
+          `from khmerthings import fix_spelling, space_words${lexExpr ? ", load_lexicon" : ""}\n\n` +
+          `text = ${pyStr(state.text)}\n` +
+          lexLine +
+          `result = space_words(fix_spelling(text${lexArg})${lexArg})\n` +
+          `print(result)\n`
+        );
+      }
       return (
         `from khmerthings import normalize_text${lexExpr ? ", load_lexicon" : ""}\n\n` +
         `text = ${pyStr(state.text)}\n` +
@@ -117,6 +148,35 @@ function buildPythonSnippet(tool, state) {
       );
     }
 
+    case "romanize": {
+      return (
+        `from khmerthings import romanize${lexExpr ? ", load_lexicon" : ""}\n\n` +
+        `text = ${pyStr(state.text)}\n` +
+        lexLine +
+        `result = romanize(text${lexArg})\n` +
+        `print(result)\n`
+      );
+    }
+
+    case "numerals": {
+      if (state.to === "words") {
+        return (
+          `import re\n` +
+          `from khmerthings import khmer_to_arabic, number_to_words\n\n` +
+          `text = ${pyStr(state.text)}\n` +
+          `result = re.sub(r"[0-9០-៩]+", lambda m: number_to_words(int(khmer_to_arabic(m.group()))), text)\n` +
+          `print(result)\n`
+        );
+      }
+      const fn = state.to === "arabic" ? "khmer_to_arabic" : "arabic_to_khmer";
+      return (
+        `from khmerthings import ${fn}\n\n` +
+        `text = ${pyStr(state.text)}\n` +
+        `result = ${fn}(text)\n` +
+        `print(result)\n`
+      );
+    }
+
     default:
       return "";
   }
@@ -128,7 +188,9 @@ function buildCliSnippet(tool, state) {
   switch (tool) {
     case "segment": {
       const markFlag = state.mode === "mark" ? " --mark" : "";
-      return `khmerthings segment${markFlag}${includeFlag} ${heredoc(state.text)}`;
+      const sepFlag =
+        state.mode === "mark" && state.separator ? ` --separator ${shQuote(state.separator)}` : "";
+      return `khmerthings segment${markFlag}${sepFlag}${includeFlag} ${heredoc(state.text)}`;
     }
 
     case "count": {
@@ -141,7 +203,10 @@ function buildCliSnippet(tool, state) {
     }
 
     case "spellcheck": {
-      return `khmerthings spellcheck${includeFlag} --max-suggestions ${state.maxSuggestions} --json ${heredoc(state.text)}`;
+      const onlyFlag = state.only ? ` --only ${state.only}` : "";
+      const maxFlag =
+        state.only === "variants" ? "" : ` --max-suggestions ${state.maxSuggestions}`;
+      return `khmerthings spellcheck${includeFlag}${onlyFlag}${maxFlag} --json ${heredoc(state.text)}`;
     }
 
     case "spellfix": {
@@ -149,7 +214,8 @@ function buildCliSnippet(tool, state) {
     }
 
     case "normalize": {
-      return `khmerthings normalize${includeFlag} ${heredoc(state.text)}`;
+      const onlyFlag = state.only ? ` --only ${state.only}` : "";
+      return `khmerthings normalize${includeFlag}${onlyFlag} ${heredoc(state.text)}`;
     }
 
     case "condense": {
@@ -157,6 +223,14 @@ function buildCliSnippet(tool, state) {
       const removeFlag = isDefault ? "" : ` --remove ${state.remove.join(",")}`;
       const wordsFlag = state.wordsMode ? " --words" : "";
       return `khmerthings condense${removeFlag}${wordsFlag}${includeFlag} ${heredoc(state.text)}`;
+    }
+
+    case "romanize": {
+      return `khmerthings romanize${includeFlag} ${heredoc(state.text)}`;
+    }
+
+    case "numerals": {
+      return `khmerthings numerals --to ${state.to} ${heredoc(state.text)}`;
     }
 
     default:

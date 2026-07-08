@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>khmerthings — interactive demo</title>
-<meta name="description" content="Try all 7 khmerthings Khmer NLP tools live in your browser, running real Python via Pyodide.">
+<meta name="description" content="Try all 9 khmerthings Khmer NLP tools live in your browser, running real Python via Pyodide.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet">
@@ -29,6 +29,8 @@
     <li><button class="tool-item" data-tool="spellfix" role="option" aria-selected="false">Spellfixer</button></li>
     <li><button class="tool-item" data-tool="normalize" role="option" aria-selected="false">Normalizer</button></li>
     <li><button class="tool-item" data-tool="condense" role="option" aria-selected="false">Condenser</button></li>
+    <li><button class="tool-item" data-tool="romanize" role="option" aria-selected="false">Romanizer</button></li>
+    <li><button class="tool-item" data-tool="numerals" role="option" aria-selected="false">Numerals</button></li>
   </ul>
 </aside>
 
@@ -45,6 +47,7 @@
       <label><input type="radio" name="segment-mode" value="list" checked> List words</label>
       <label><input type="radio" name="segment-mode" value="mark"> Mark boundaries</label>
     </fieldset>
+    <label class="sep-toggle" hidden>Separator <input type="text" class="sep-input" placeholder="ZWSP" style="width:5em"></label>
     <label class="reveal-toggle" hidden><input type="checkbox" class="reveal-seps"> Reveal separators (·)</label>
     <div class="include-group" data-includes></div>
   </div>
@@ -106,6 +109,11 @@
   <textarea class="kt-text" rows="3">ខ្ញុំសំរាប់ការងារ</textarea>
   <div class="options">
     <label>Max suggestions <input type="number" class="max-suggestions" value="3" min="0" max="20" style="width:4em"></label>
+    <label>Report <select class="only-select">
+      <option value="">both kinds</option>
+      <option value="variants">variants only</option>
+      <option value="unknown">unknown only</option>
+    </select></label>
     <div class="include-group" data-includes></div>
   </div>
   <div class="error" hidden></div>
@@ -144,6 +152,11 @@
   <p class="desc">Spellfix and re-space text into clean, ready-to-use form.</p>
   <textarea class="kt-text" rows="3">ខ្ញុំសំរាប់ការងារ</textarea>
   <div class="options">
+    <label>Passes <select class="only-select">
+      <option value="">both</option>
+      <option value="words">words only</option>
+      <option value="sentences">sentences only</option>
+    </select></label>
     <label class="reveal-toggle"><input type="checkbox" class="reveal-seps"> Reveal separators (·)</label>
     <div class="include-group" data-includes></div>
   </div>
@@ -183,6 +196,48 @@
   <div class="diagram-section">
     <h3>How it works</h3>
     <div class="diagram" data-diagram="condense"></div>
+  </div>
+</section>
+
+<!-- Romanizer -->
+<section class="tool-panel" id="panel-romanize" data-tool="romanize">
+  <h2>Romanizer</h2>
+  <p class="desc">Phonetically romanize Khmer into Latin (UNGEGN-style). Phonetic, not reversible.</p>
+  <textarea class="kt-text" rows="3">ភ្នំពេញ ខ្ញុំទៅសាលា</textarea>
+  <div class="options">
+    <div class="include-group" data-includes></div>
+  </div>
+  <div class="error" hidden></div>
+  <div class="output-section">
+    <div class="output-header"><h3>Output</h3><button class="copy-btn" data-copy-target="output">Copy</button></div>
+    <div class="output"></div>
+  </div>
+  <div class="diagram-section">
+    <h3>How it works</h3>
+    <div class="diagram" data-diagram="romanize"></div>
+  </div>
+</section>
+
+<!-- Numerals -->
+<section class="tool-panel" id="panel-numerals" data-tool="numerals">
+  <h2>Numerals</h2>
+  <p class="desc">Convert numbers between Khmer digits, Arabic digits, and spelled-out Khmer words.</p>
+  <textarea class="kt-text" rows="3">តម្លៃ 2500 រៀល</textarea>
+  <div class="options">
+    <label>Convert to <select class="to-select">
+      <option value="khmer">Khmer digits</option>
+      <option value="arabic">Arabic digits</option>
+      <option value="words">Khmer words</option>
+    </select></label>
+  </div>
+  <div class="error" hidden></div>
+  <div class="output-section">
+    <div class="output-header"><h3>Output</h3><button class="copy-btn" data-copy-target="output">Copy</button></div>
+    <div class="output"></div>
+  </div>
+  <div class="diagram-section">
+    <h3>How it works</h3>
+    <div class="diagram" data-diagram="numerals"></div>
   </div>
 </section>
 

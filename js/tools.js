@@ -88,6 +88,7 @@ function readState(tool, panel) {
         text,
         includes,
         mode: panel.querySelector("input[name=segment-mode]:checked").value,
+        separator: panel.querySelector(".sep-input").value,
       };
     case "count":
       return { text, includes };
@@ -101,11 +102,12 @@ function readState(tool, panel) {
         text,
         includes,
         maxSuggestions: parseInt(panel.querySelector(".max-suggestions").value, 10) || 0,
+        only: panel.querySelector(".only-select").value,
       };
     case "spellfix":
       return { text, includes };
     case "normalize":
-      return { text, includes };
+      return { text, includes, only: panel.querySelector(".only-select").value };
     case "condense":
       return {
         text,
@@ -115,6 +117,10 @@ function readState(tool, panel) {
         ).map((cb) => cb.value),
         wordsMode: panel.querySelector("input[name=condense-mode]:checked").value === "words",
       };
+    case "romanize":
+      return { text, includes };
+    case "numerals":
+      return { text, to: panel.querySelector(".to-select").value };
     default:
       return { text, includes };
   }
@@ -125,9 +131,13 @@ const handlers = {
     const state = readState("segment", panel);
     const output = panel.querySelector(".output");
     const revealToggle = panel.querySelector(".reveal-toggle");
+    const sepToggle = panel.querySelector(".sep-toggle");
     if (state.mode === "mark") {
       revealToggle.hidden = false;
-      const marked = await KT.markBoundaries(state.text, state.includes);
+      sepToggle.hidden = false;
+      // Empty input means the CLI/library default word delimiter (ZWSP).
+      const separator = state.separator || "​";
+      const marked = await KT.markBoundaries(state.text, state.includes, separator);
       panel._lastResult = { mode: "mark", marked };
       const reveal = revealToggle.querySelector(".reveal-seps").checked;
       output.innerHTML = "";
@@ -137,6 +147,7 @@ const handlers = {
       output.appendChild(pre);
     } else {
       revealToggle.hidden = true;
+      sepToggle.hidden = true;
       const words = await KT.segment(state.text, state.includes);
       panel._lastResult = { mode: "list", words };
       renderList(output, words);
@@ -164,8 +175,8 @@ const handlers = {
 
   async spellcheck(panel) {
     const state = readState("spellcheck", panel);
-    const issues = await KT.spellcheck(state.text, state.includes, state.maxSuggestions);
-    panel._lastResult = { issues };
+    const issues = await KT.spellcheck(state.text, state.includes, state.maxSuggestions, state.only);
+    panel._lastResult = { issues, only: state.only };
     renderTable(
       panel.querySelector(".output"),
       ["text", "kind", "start", "end", "suggestions"],
@@ -191,8 +202,8 @@ const handlers = {
 
   async normalize(panel) {
     const state = readState("normalize", panel);
-    const result = await KT.normalize(state.text, state.includes);
-    panel._lastResult = { text: state.text, result };
+    const result = await KT.normalize(state.text, state.includes, state.only);
+    panel._lastResult = { text: state.text, result, only: state.only };
     const reveal = panel.querySelector(".reveal-seps").checked;
     const output = panel.querySelector(".output");
     output.innerHTML = "";
@@ -224,6 +235,30 @@ const handlers = {
       pre.textContent = result;
       output.appendChild(pre);
     }
+  },
+
+  async romanize(panel) {
+    const state = readState("romanize", panel);
+    const result = await KT.romanize(state.text, state.includes);
+    panel._lastResult = { text: state.text, result };
+    const output = panel.querySelector(".output");
+    output.innerHTML = "";
+    const pre = document.createElement("pre");
+    pre.className = "kt-text-output";
+    pre.textContent = result;
+    output.appendChild(pre);
+  },
+
+  async numerals(panel) {
+    const state = readState("numerals", panel);
+    const result = await KT.numerals(state.text, state.to);
+    panel._lastResult = { text: state.text, to: state.to, result };
+    const output = panel.querySelector(".output");
+    output.innerHTML = "";
+    const pre = document.createElement("pre");
+    pre.className = "kt-text-output";
+    pre.textContent = result;
+    output.appendChild(pre);
   },
 };
 
