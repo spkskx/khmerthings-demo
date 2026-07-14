@@ -17,18 +17,12 @@ const WORD_COUNT_FIELDS = [
   "characters",
 ];
 
-function countZwsp(text) {
-  return text ? text.split("​").length - 1 : 0;
-}
-
 const DIAGRAM_SPECS = {
   segment(data) {
     return {
       stages: [
         ...BASE_STAGES,
-        data && data.mode === "mark"
-          ? { label: "Insert separators at word boundaries", badge: `${countZwsp(data.marked)} boundaries` }
-          : { label: "Emit word list", badge: data ? `${data.words.length} words` : null },
+        { label: "Emit word list", badge: data ? `${data.words.length} words` : null },
       ],
     };
   },
@@ -47,16 +41,14 @@ const DIAGRAM_SPECS = {
   },
 
   normalize(data) {
-    const badge = data ? `${countZwsp(data.result)} boundaries spaced` : null;
-    const only = data ? data.only : "";
-    const wordStages = [
-      { label: "fix_spelling (known variant rewrite)" },
-      { label: "space_words (hidden ZWSP at boundaries)", badge },
-    ];
-    const sentenceStage = { label: "space_sentences (។ / ៕ spacing)" };
-    if (only === "words") return { stages: [...BASE_STAGES, ...wordStages] };
-    if (only === "sentences") return { stages: [{ label: "NFC normalize" }, sentenceStage] };
-    return { stages: [...BASE_STAGES, ...wordStages, sentenceStage] };
+    return {
+      stages: [
+        ...BASE_STAGES,
+        { label: "fix_spelling (known variant rewrite)" },
+        { label: "space_words (hidden ZWSP at boundaries)" },
+        { label: "space_sentences (។ / ៕ spacing)" },
+      ],
+    };
   },
 };
 

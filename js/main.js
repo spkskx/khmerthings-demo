@@ -74,9 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupCopyButtons();
 
   initPyodide().then(() => {
-    if (KT.ready) {
-      populateDynamicControls();
-      onToolChange();
-    }
+    if (KT.ready) onToolChange();
   });
 });

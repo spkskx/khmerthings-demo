@@ -7,14 +7,16 @@
 <meta name="description" content="Try the current khmerthings Khmer NLP tools live in your browser, running real Python via Pyodide.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+<a class="skip-link" href="#workspace">Skip to demo</a>
 <header class="site-header">
-  <h1>khmerthings</h1>
-  <p class="tagline">Deterministic Khmer language tools — running as real Python in your browser via <a href="https://pyodide.org/" target="_blank" rel="noopener">Pyodide</a>, no server involved.</p>
+  <p class="eyebrow">Khmer NLP · browser demo</p>
+  <h1>Type Khmer text. Get the tool output.</h1>
+  <p class="tagline">Word breaking, counting, and normalization run locally as real Python through <a href="https://pyodide.org/" target="_blank" rel="noopener">Pyodide</a>. No account, no server.</p>
   <div id="status-bar" class="status status-loading">Loading Pyodide…</div>
 </header>
 
@@ -28,22 +30,13 @@
   </ul>
 </aside>
 
-<main class="workspace">
+<main class="workspace" id="workspace">
 
 <section class="tool-panel active" id="panel-segment" data-tool="segment">
   <h2>Word breaker</h2>
   <p class="desc">Split Khmer text into words. Khmer script writes no spaces between words, so this does real segmentation work.</p>
-  <textarea class="kt-text" rows="3">ខ្ញុំស្រឡាញ់ភាសាខ្មែរ</textarea>
-  <div class="options">
-    <fieldset class="mode-group">
-      <legend>Mode</legend>
-      <label><input type="radio" name="segment-mode" value="list" checked> List words</label>
-      <label><input type="radio" name="segment-mode" value="mark"> Mark boundaries</label>
-    </fieldset>
-    <label class="sep-toggle" hidden>Separator <input type="text" class="sep-input" placeholder="ZWSP" style="width:5em"></label>
-    <label class="reveal-toggle" hidden><input type="checkbox" class="reveal-seps"> Reveal separators (·)</label>
-    <div class="include-group" data-includes></div>
-  </div>
+  <label class="input-label">Input</label>
+  <textarea class="kt-text" rows="4">ខ្ញុំស្រឡាញ់ភាសាខ្មែរ</textarea>
   <div class="error" hidden></div>
   <div class="output-section"><div class="output-header"><h3>Output</h3><button class="copy-btn" data-copy-target="output">Copy</button></div><div class="output"></div></div>
   <div class="diagram-section"><h3>How it works</h3><div class="diagram" data-diagram="segment"></div></div>
@@ -52,8 +45,8 @@
 <section class="tool-panel" id="panel-count" data-tool="count">
   <h2>Word counter</h2>
   <p class="desc">Count words and characters in Khmer or mixed text.</p>
-  <textarea class="kt-text" rows="3">ខ្ញុំមានឆ្កែ ២ ក្បាល and 3 cats</textarea>
-  <div class="options"><div class="include-group" data-includes></div></div>
+  <label class="input-label">Input</label>
+  <textarea class="kt-text" rows="4">ខ្ញុំមានឆ្កែ ២ ក្បាល and 3 cats</textarea>
   <div class="error" hidden></div>
   <div class="output-section"><div class="output-header"><h3>Output</h3><button class="copy-btn" data-copy-target="output">Copy</button></div><div class="output"></div></div>
   <div class="diagram-section"><h3>How it works</h3><div class="diagram" data-diagram="count"></div></div>
@@ -62,12 +55,8 @@
 <section class="tool-panel" id="panel-normalize" data-tool="normalize">
   <h2>Normalizer</h2>
   <p class="desc">Spellfix and re-space text into clean, ready-to-use form.</p>
-  <textarea class="kt-text" rows="3">ខ្ញុំសំរាប់ការងារ</textarea>
-  <div class="options">
-    <label>Passes <select class="only-select"><option value="">both</option><option value="words">words only</option><option value="sentences">sentences only</option></select></label>
-    <label class="reveal-toggle"><input type="checkbox" class="reveal-seps"> Reveal separators (·)</label>
-    <div class="include-group" data-includes></div>
-  </div>
+  <label class="input-label">Input</label>
+  <textarea class="kt-text" rows="4">ខ្ញុំសំរាប់ការងារ</textarea>
   <div class="error" hidden></div>
   <div class="output-section"><div class="output-header"><h3>Output</h3><button class="copy-btn" data-copy-target="output">Copy</button></div><div class="output"></div></div>
   <div class="diagram-section"><h3>How it works</h3><div class="diagram" data-diagram="normalize"></div></div>

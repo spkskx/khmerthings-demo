@@ -12,17 +12,6 @@ function clearError(panel) {
   err.textContent = "";
 }
 
-function selectedIncludes(panel) {
-  const group = panel.querySelector(".include-group");
-  if (!group) return [];
-  return Array.from(group.querySelectorAll("input[type=checkbox]:checked")).map(
-    (cb) => cb.value
-  );
-}
-
-function revealSeparators(text, on) {
-  return on ? text.replaceAll("​", "·") : text;
-}
 
 function renderList(container, items) {
   container.innerHTML = "";
@@ -66,51 +55,20 @@ function renderTable(container, headers, rows) {
 }
 
 function readState(tool, panel) {
-  const text = panel.querySelector(".kt-text").value;
-  const includes = selectedIncludes(panel);
-  switch (tool) {
-    case "segment":
-      return {
-        text,
-        includes,
-        mode: panel.querySelector("input[name=segment-mode]:checked").value,
-        separator: panel.querySelector(".sep-input").value,
-      };
-    case "normalize":
-      return { text, includes, only: panel.querySelector(".only-select").value };
-    default:
-      return { text, includes };
-  }
+  return { text: panel.querySelector(".kt-text").value };
 }
 
 const handlers = {
   async segment(panel) {
     const state = readState("segment", panel);
-    const output = panel.querySelector(".output");
-    const revealToggle = panel.querySelector(".reveal-toggle");
-    const sepToggle = panel.querySelector(".sep-toggle");
-    if (state.mode === "mark") {
-      revealToggle.hidden = false;
-      sepToggle.hidden = false;
-      const marked = await KT.markBoundaries(state.text, state.includes, state.separator || "​");
-      panel._lastResult = { mode: "mark", marked };
-      output.innerHTML = "";
-      const pre = document.createElement("pre");
-      pre.className = "kt-text-output";
-      pre.textContent = revealSeparators(marked, revealToggle.querySelector(".reveal-seps").checked);
-      output.appendChild(pre);
-    } else {
-      revealToggle.hidden = true;
-      sepToggle.hidden = true;
-      const words = await KT.segment(state.text, state.includes);
-      panel._lastResult = { mode: "list", words };
-      renderList(output, words);
-    }
+    const words = await KT.segment(state.text, []);
+    panel._lastResult = { words };
+    renderList(panel.querySelector(".output"), words);
   },
 
   async count(panel) {
     const state = readState("count", panel);
-    const result = await KT.count(state.text, state.includes);
+    const result = await KT.count(state.text, []);
     panel._lastResult = { result };
     renderTable(
       panel.querySelector(".output"),
@@ -121,33 +79,16 @@ const handlers = {
 
   async normalize(panel) {
     const state = readState("normalize", panel);
-    const result = await KT.normalize(state.text, state.includes, state.only);
-    panel._lastResult = { text: state.text, result, only: state.only };
+    const result = await KT.normalize(state.text, [], "");
+    panel._lastResult = { text: state.text, result };
     const output = panel.querySelector(".output");
     output.innerHTML = "";
     const pre = document.createElement("pre");
     pre.className = "kt-text-output";
-    pre.textContent = revealSeparators(result, panel.querySelector(".reveal-seps").checked);
+    pre.textContent = result;
     output.appendChild(pre);
   },
 };
-
-function populateDynamicControls() {
-  document.querySelectorAll(".include-group[data-includes]").forEach((group) => {
-    const panel = group.closest(".tool-panel");
-    group.innerHTML = "";
-    for (const source of KT.wordSources) {
-      const label = document.createElement("label");
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.value = source;
-      cb.addEventListener("change", () => onPanelChange(panel));
-      label.appendChild(cb);
-      label.append(" " + source);
-      group.appendChild(label);
-    }
-  });
-}
 
 function getCopyText(container) {
   const table = container.querySelector(":scope > table");
