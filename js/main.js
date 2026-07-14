@@ -19,7 +19,11 @@ function renderSnippets(panel) {
   document.getElementById("cli-snippet").textContent = buildCliSnippet(tool, state);
 }
 
-const debouncedRun = debounce(async (panel) => {
+async function runPanel(panel) {
+  if (!KT.ready) {
+    showError(panel, "Still loading khmerthings. Try again in a moment.");
+    return;
+  }
   const tool = panel.dataset.tool;
   clearError(panel);
   try {
@@ -29,11 +33,13 @@ const debouncedRun = debounce(async (panel) => {
     console.error(err);
     showError(panel, err && err.message ? err.message : String(err));
   }
-}, 250);
+}
+
+const debouncedRun = debounce(runPanel, 250);
 
 function onPanelChange(panel) {
   renderSnippets(panel);
-  if (KT.ready) debouncedRun(panel);
+  debouncedRun(panel);
 }
 
 function onToolChange() {
@@ -61,9 +67,13 @@ function setupSidebar() {
 
 function wireReactiveInputs() {
   document.querySelectorAll(".tool-panel").forEach((panel) => {
-    panel.querySelectorAll("input, textarea, select").forEach((el) => {
-      const evt = el.tagName === "TEXTAREA" || el.type === "number" ? "input" : "change";
-      el.addEventListener(evt, () => onPanelChange(panel));
+    panel.querySelectorAll("textarea").forEach((el) => {
+      el.addEventListener("input", () => onPanelChange(panel));
+      el.addEventListener("paste", () => setTimeout(() => onPanelChange(panel)));
+    });
+    panel.querySelector(".run-btn").addEventListener("click", () => {
+      renderSnippets(panel);
+      runPanel(panel);
     });
   });
 }
