@@ -1,8 +1,7 @@
 # khmerthings-demo
 
-Interactive browser demo of all 9 [khmerthings](https://github.com/spkskx/khmerthings)
-tools — word breaker, word counter, line sorter, spellchecker, spellfixer,
-normalizer, condenser, romanizer, and numerals — running as real Python in
+Interactive browser demo of the current [khmerthings](https://github.com/spkskx/khmerthings)
+tools — word breaker, word counter, and normalizer — running as real Python in
 your browser, no server involved.
 
 Live: https://spkskx.github.io/khmerthings-demo/
